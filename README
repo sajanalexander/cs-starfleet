@@ -1,0 +1,42 @@
+Running: 
+
+Assuming Java and SBT are both installed: 
+
+sbt "run <field file> <script file>"
+
+Note the quotes are necessary around everything other than 'sbt'. Otherwise SBT thinks you're trying to run multiple commands. 
+
+e.g.
+
+sbt "run ./src/test/resources/examples/1/field.txt ./src/test/resources/examples/1/script.txt"
+
+
+Overview: 
+
+The project contains the following source files in src/main/scala 
+
+Coordinate.scala
+Coordinate is used to model a 2-d point and CoordinateOffset is used to fascilitate coordinate math.  
+
+Operation.scala
+Operation is a sealed trait which models the operations that can be applied during a step of the simulation.  There are three types of Operations, MovementOperation (moves the ship within the cross section, implementers describe the direction of movement), FiringOperation (fires a round of torpedoes, implementers describe the firing pattern), and Descend (causes the ship to descend within the cuboid at the end of the step, this cannot be invoked via the script). Operations act upon SimulationState and create a new SimulationState.  
+
+MineField.scala
+MineField models the mines that are defined within the current cross-section.  A mine can be an UndetonatedMine or a MissedMine.  The mines have knowledge of its relative depth with respect to a ship's position.   
+
+Simulation.scala
+Simulation is the main entry point for the application.  It reads the field and script files and performs the simulation. The simulation is essentially a fold over the script file and results in a 2-tuple of SimulationState and Option[SimulationResult].  From these two, the evaluation of the simulation can be determined. 
+
+Misc. Notes: 
+
+The instructions state that 'north' increments the y-coordinate of the ship while 'south' decrements it.  There is some ambiguitity within this as the instructions also state that the top-left corner is (0, 0).  I took this to be a mistake with the definitions of 'north' and 'south' since that would match the example output.  
+
+No attempt was made at profiling.  As is such, it is likely that this could be sped up quite a bit.  
+
+'Real' unit-testing was not done in the interest of time.  Much of the code is functional, so unit testing could be easily added. 
+
+The major part that is not functional is the printing what is happening during the simulation.  I guess you could use Scalaz's IO Monad, but that's definitely out of the scope of this project.  
+
+Error/Exception handling could be better, as well as cleaning up file handles from the Source instances
+
+
